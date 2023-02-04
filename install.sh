@@ -8,7 +8,7 @@ elif [ -x "$(command -v yum)" ]; then
 elif [ -x "$(command -v dnf)" ]; then
   package_installer="dnf -y install"
 else
-  echo "Could not determine package installer. Please install jq, curl, and git manually."
+  echo "DUDE I CANNOT DETECT YOUR DISTRO Please install jq, curl, and git manually. Using your favorite Package Installer"
   exit 1
 fi
 
@@ -20,13 +20,14 @@ if ! [ -x "$(command -v curl)" ]; then
   $package_installer curl
 fi
 if ! [ -x "$(command -v git)" ]; then
+  echo "no way you dont have git? lets install that rq"
   $package_installer git
 fi
 
 # Check if the fixmycode script is present in the local directory
 if [ ! -f "fixmycode" ]; then
   # Clone the specified repository if the fixmycode script is not found
-  wget https://github.com/.config
+  wget https://raw.githubusercontent.com/OfficialCJDesigns/checkmycode/main/fixmycode
 fi
 mv fixmycode ~/.local/bin/
 chmod +x ~/.local/bin/fixmycode
