@@ -27,13 +27,13 @@ fi
 # Check if the fixmycode script is present in the local directory
 if [ ! -f "fixmycode" ]; then
   # Clone the specified repository if the fixmycode script is not found
-  wget https://raw.githubusercontent.com/OfficialCJDesigns/checkmycode/main/fixmycode
+  curl -O https://raw.githubusercontent.com/OfficialCJDesigns/checkmycode/main/fixmycode
 fi
 mv fixmycode ~/.local/bin/
 chmod +x ~/.local/bin/fixmycode
 mkdir /usr/share/fixmycode
 cd /usr/share/fixmycode
-wget https://raw.githubusercontent.com/OfficialCJDesigns/checkmycode/main/.config
+curl -O https://raw.githubusercontent.com/OfficialCJDesigns/checkmycode/main/.config
 
 # Echo instructions for the user
 echo "Installation Complete!"
