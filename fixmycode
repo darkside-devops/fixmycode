@@ -1,0 +1,56 @@
+#!/bin/bash
+
+# Check if the program is called as "fixmycode"
+if [ "$(basename $0)" == "fixmycode" ]; then
+  # Clear the console
+  clear
+
+  # ASCII banner
+  echo "
+⠀⠀⠀⠀⠀⠀⠀⣠⣾⣿⡿⠟⠁⠀⠀⠀⠀⣶⣶⣶⣶⠠⣶⠀⠀⠀⠀⠀⠀⠀⠀⣶⣶⡄⠀⣶⣶⡆⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⢿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⢀⣴⣾⣿⡿⠋⠀⠀⠀⠀⠀⠀⠀⣿⣧⣤⣤⢸⣿⠈⢿⣆⣼⡟⠀⠀⠀⣿⣿⣧⢰⡿⣿⡇⢻⣧⢀⣿⠃⠀⠀⠀⠀⠀⠀⠙⢿⣿⣷⣦⡀⠀⠀⠀⠀
+⠀⠀⢀⣴⣿⣿⡿⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⡏⠉⠉⢸⣿⠀⣠⣿⣿⡄⠀⠀⠀⣿⡇⣿⣾⠇⣿⡇⠈⣿⣼⡏⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢿⣿⣿⣦⡀⠀⠀
+⢀⣴⣿⣿⡿⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠛⠃⠀⠀⠘⠛⠐⠛⠁⠘⠛⠂⠀⠀⠛⠃⠘⠛⠀⠛⠃⢠⣼⡿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢿⣿⣿⣦⡀
+⠙⢿⣿⣿⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣤⣤⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣤⠀⠀⠀⠀⠈⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣴⣿⣿⡿⠋
+⠀⠀⠙⢿⣿⣿⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣾⡟⠉⠙⠛⠃⢠⣴⣶⣦⡀⢀⣴⣶⣼⣿⢀⣤⡶⣶⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣴⣿⣿⡿⠋⠀⠀
+⠀⠀⠀⠀⠈⠻⣿⣿⣦⣄⠀⠀⠀⠀⠀⠀⠀⠈⣿⣇⠀⢀⣤⡄⣿⡇⠀⣹⡷⢸⣏⠀⢸⣿⢸⣿⠶⢾⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣴⣿⣿⠟⠁⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠈⠻⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠈⠻⠿⠿⠛⠀⠘⠻⠿⠟⠁⠈⠻⠿⠻⠟⠀⠛⠿⠟⠋⠀⠀⠀⠀⠀⠀⠀⠀⣠⣾⣿⣿⠟⠁⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠉⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠉⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀"
+  echo ""
+
+  read -p "Enter the programming language: " language
+
+  supported_languages=("python" "javascript" "java" "c" "c++")
+  if [[ ! " ${supported_languages[@]} " =~ " $language " ]]; then
+    echo "Error: Unsupported programming language"
+    exit 1
+  fi
+
+  read -p "Enter the name of the file that holds the code: " filename
+
+  if [ ! -f $filename ]; then
+    echo "Error: File does not exist"
+    exit 1
+  fi
+
+  extension="${filename##*.}"
+  output_file="${filename%.*}_improved.$extension"
+
+  response=$(curl -X POST -H "Content-Type: application/json" -d '{"language":"'"$language"'","code":"'"$(cat $filename)"'"}' https://api.openai.com/v1/engines/code-completion/jobs)
+
+  if [ $? -ne 0 ]; then
+    echo "Error: API call failed"
+    exit 1
+  fi
+
+  improved_code=$(echo $response | jq -r '.choices[0].text')
+
+  echo "$improved_code" > $output_file
+
+  echo "Improved code written to $output_file"
+else
+  echo "Error: The program must be called as fixmycode"
+  exit 1
+fi
+
+fixmycode
