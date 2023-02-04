@@ -7,5 +7,5 @@
 To get started get the install.sh by `wget {put the link here later you are so fucking lazy}` `chmod x ./install.sh` after that run `checkmycode` to verify installation
 
 
-#Usage
+# Usage
 `checkmycode` Starts the Application
