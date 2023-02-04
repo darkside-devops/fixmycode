@@ -1,0 +1,59 @@
+#!/bin/bash
+
+# Check if the program is called as "checkmycode"
+if [ "$(basename $0)" == "checkmycode" ]; then
+  # Clear the console
+  clear
+
+  # ASCII banner
+  echo " _____ _          _  _            _____                           "
+  echo "|   __|_|___ ___|_|_| |_ ___ ___|   __|___ ___ ___ ___ ___ ___ _ _ "
+  echo "|__   | |  _|  _| |  |  _| -_|  _|__   |  _|  _|  _|  _|  _|  _| | |"
+  echo "|_____|_|_| |_| |_|  |_| |___|_| |_____|_| |_| |_|_| |_| |___|_  |_|"
+  echo "                                                               |___|  "
+  echo ""
+
+  # Ask for the programming language
+  read -p "Enter the programming language: " language
+
+  # Check if the programming language is supported
+  supported_languages=("python" "javascript" "java" "c" "c++")
+  if [[ ! " ${supported_languages[@]} " =~ " $language " ]]; then
+    echo "Error: Unsupported programming language"
+    exit 1
+  fi
+
+  # Ask for the file name
+  read -p "Enter the name of the file that holds the code: " filename
+
+  # Check if the file exists
+  if [ ! -f $filename ]; then
+    echo "Error: File does not exist"
+    exit 1
+  fi
+
+  # Define the output file name
+  extension="${filename##*.}"
+  output_file="${filename%.*}_improved.$extension"
+
+  # Call OpenAI API to fix errors and improve code
+  response=$(curl -X POST -H "Content-Type: application/json" -d '{"language":"'"$language"'","code":"'"$(cat $filename)"'"}' https://api.openai.com/v1/engines/code-completion/jobs)
+
+  # Check if the API call was successful
+  if [ $? -ne 0 ]; then
+    echo "Error: API call failed"
+    exit 1
+  fi
+
+  # Extract the improved code from the API response
+  improved_code=$(echo $response | jq -r '.choices[0].text')
+
+  # Write the improved code to the output file
+  echo "$improved_code" > $output_file
+
+  # Confirmation message
+  echo "Improved code written to $output_file"
+else
+  echo "Error: The program must be called as checkmycode"
+  exit 1
+fi
