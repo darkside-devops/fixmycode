@@ -41,12 +41,26 @@ if [ "$(basename $0)" == "fixmycode" ]; then
   extension="${filename##*.}"
   output_file="${filename%.*}_improved.$extension"
 
+  while IFS= read -r line
+    do
+      if [[ $line =~ ^#AI.* ]]; then
+        # Parse the contents of the file
+      fi
+    done < "$filename"
+
+
+  while [ -z "$response" ]; do
+  sleep 1
   response=$(curl -X POST -H "Authorization: Bearer $OPENAI_API_KEY" "Content-Type: application/json" -d '{"language":"'"$language"'","code":"'"$(cat $filename)"'"}' https://api.openai.com/v1/engines/code-completion/jobs)
+  done
+
 
   if [ $? -ne 0 ]; then
-    echo "Error: API call failed"
-    exit 1
+  echo "Error: API call failed"
+  exit 1
   fi
+
+  response=$(curl -X POST -H "Authorization: Bearer $OPENAI_API_KEY" "Content-Type: application/json" -d '{"language":"'"$language"'","code":"'"$(cat $filename)"'"}' https://api.openai.com/v1/engines/code-completion/jobs)
 
   improved_code=$(echo $response | jq -r '.choices[0].text')
 
